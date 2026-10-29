@@ -57,7 +57,7 @@ svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke
 .dragging,.dragging *{cursor:grabbing!important}
 footer{text-align:center;color:var(--mute);font-size:10px;opacity:.7;padding:8px 30px 2px;width:max-content;margin:0 auto;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .2s,opacity .2s}
 footer.hold{transform:scale(1.5);opacity:1;transition:transform .7s linear,opacity .7s linear}
-#bar{position:fixed;left:0;right:0;bottom:var(--kb,0px);max-width:560px;margin:0 auto;background:var(--card);border-radius:20px 20px 0 0;padding:12px 12px calc(env(safe-area-inset-bottom) + 8px);box-shadow:0 -8px 28px rgba(0,0,0,.14);transform:translateY(110%);transition:transform .34s cubic-bezier(.22,.9,.3,1);will-change:transform;z-index:55}
+#bar{position:fixed;left:0;right:0;bottom:var(--kb,0px);max-width:560px;margin:0 auto;background:var(--card);border-radius:20px 20px 0 0;padding:12px 12px calc(env(safe-area-inset-bottom) + 8px);box-shadow:0 -8px 28px rgba(0,0,0,.14);transform:translateY(110%);transition:transform .34s cubic-bezier(.22,.9,.3,1),bottom .16s ease-out;will-change:transform;z-index:55}
 #bar.on{transform:none}
 #bar .r{display:flex;gap:8px}
 #bar input,.sh input,#log input{font:inherit;font-size:16px;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line2);background:var(--bg);color:var(--ink);outline:0;transition:border-color .2s}
@@ -147,7 +147,7 @@ footer.hold{transform:scale(1.5);opacity:1;transition:transform .7s linear,opaci
 <div id="shop" class="sh tall"><div class="sht"><h2>Shopping list</h2><span id="shc"></span></div><p id="shs"></p><div id="shl"></div><div class="hbtn" id="shb"><button class="btn" id="shcp">Copy list</button><button class="btn p" id="shsh">Share</button></div><button class="shu" id="shu">Untick all</button></div>
 <div id="hist" class="sh tall"><h2>History</h2><p id="hmsg"></p><div id="hlist"></div></div>
 <script>
-let RH=64,CH=230;const DNm=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],K='meals.v1',SK='meals.sync',HK='meals.hist',PK='meals.pend';
+let RH=64,CH=230,VH=innerHeight;const DNm=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],K='meals.v1',SK='meals.sync',HK='meals.hist',PK='meals.pend';
 const $=s=>document.querySelector(s),grid=$('#grid'),mi=$('#mi'),bar=$('#bar'),B=document.body,uid=()=>Math.random().toString(36).slice(2,9);
 const svg=p=>`<svg viewBox="0 0 24 24">${p}</svg>`;
 const HOME=svg('<path d="M3.5 11 12 3.5l8.5 7.5M5.5 9.5V20h13V9.5M10 20v-5.5h4V20"/>'),OUT=svg('<path d="M5 3v5a3 3 0 0 0 6 0V3M8 3v18M17 21V3c-2.2 1.2-3 3.8-3 7 0 1.7 1 2.5 3 2.5"/>'),CHEV=svg('<path d="m6 9 6 6 6-6"/>');
@@ -242,7 +242,7 @@ const minW=()=>addD(CWK,-28),maxW=()=>addD(CWK,84);
 function render(dir){
   const V=visFor(vw),a=V.a,z=V.z,days=(z-a+1)/2,td=iso(new Date());let h='';
   const tg=weekTag();$('#wk').innerHTML=esc(rngS(a,z))+(tg?`<em>${tg}</em>`:'');
-  $('#wp').disabled=vw<=minW();$('#wn').disabled=vw>=maxW();grid.style.setProperty('--n',days);
+  $('#wp').disabled=vw<=minW();$('#wn').disabled=vw>=maxW();grid.style.setProperty('--n',days);RH=Math.max(56,Math.min(104,Math.floor((VH-CH)/days)));grid.style.setProperty('--rowh',RH+'px');
   for(let d=0;d<days;d++){const s=a+d*2,r=d+1;
     h+=`<div class="rl" style="grid-row:${r}"></div><div class="lab" style="grid-row:${r}"><div class="d${isoOf(s>>1)===td?' today':''}">${DNm[wdOf(s>>1)]}</div><div class="m">${fd(s>>1)}</div></div>`;
     for(let c=0;c<2;c++){const sl=s+c,cov=[0,1].map(k=>S.blocks.some(b=>b.s<=sl&&sl<b.s+b.n&&(b.l==='b'||b.l===(k?'e':'t')))),
@@ -306,8 +306,9 @@ bar.addEventListener('click',e=>{const a=e.target.closest('[data-a]')?.dataset.a
   if(a==='rep'){rep={t:b.t,k:b.k,p:b.p,nt:b.nt,sl:b.sl};pasted=new Set();sel=null;B.classList.add('rep');mi.placeholder='Meal to paste';render();return}});
 /* tap outside the bar closes it (taps on boxes switch to them) */
 document.addEventListener('pointerdown',e=>{if(!bar.classList.contains('on')||rep||bar.contains(e.target)||e.target.closest('.blk,.em,#toast'))return;done()},true);
-if(window.visualViewport){const vv=visualViewport,kb=()=>document.documentElement.style.setProperty('--kb',Math.max(0,innerHeight-vv.height-vv.offsetTop)+'px');let kt=0;
-  vv.addEventListener('resize',()=>{kb();clearTimeout(kt);kt=setTimeout(ensureVisible,140)});vv.addEventListener('scroll',kb)}
+if(window.visualViewport){const vv=visualViewport,root=document.documentElement,kb=()=>root.style.setProperty('--kb',Math.max(0,innerHeight-vv.height-vv.offsetTop)+'px');let kt=0,lh=vv.height;
+  vv.addEventListener('resize',()=>{const opening=vv.height<lh-40;lh=vv.height;kb();clearTimeout(kt);if(opening)kt=setTimeout(ensureVisible,60)});vv.addEventListener('scroll',kb)}
+['mi','mn','ms','pn'].forEach(id=>$('#'+id).addEventListener('blur',()=>setTimeout(()=>{if(!document.activeElement||!document.activeElement.matches('input,textarea'))document.documentElement.style.setProperty('--kb','0px')},60)));
 new ResizeObserver(()=>{if(bar.classList.contains('on')){B.style.paddingBottom=bar.offsetHeight+30+'px';requestAnimationFrame(ensureVisible)}}).observe(bar);
 
 /* tap empty = new meal; copy mode pastes ONE box at a time (also in other weeks) */
@@ -441,7 +442,8 @@ async function pull(){tick();if(!API)return;if(busy||drag||rz||document.activeEl
 setInterval(()=>{tick();document.visibilityState==='visible'&&pull()},15000);document.addEventListener('visibilitychange',()=>document.visibilityState==='visible'&&pull());addEventListener('online',pull);
 
 /* ---- what's new + theme + hold-the-version ---- */
-const LOG=[{v:'1.9',d:'2026-10-26',n:['Swipe left or right on the plan to change weeks.','New layout: days run down the side with Lunch and Dinner as the columns. Use Split to give Tiffany and Eric different meals in the same box.','Copy and paste: copy a meal, then paste it into as many boxes as you like, one box at a time. Change weeks while pasting to copy from past weeks into this week or upcoming ones.','Meals that carry on from one box into the next now join into one connected shape, even across days.']}];
+const LOG=[{v:'1.9.1',d:'2026-10-29',n:['Smoother keyboard: closing it no longer squashes or shifts the plan, and the entry bar now drops away with the keyboard instead of lagging behind.','Rows keep a steady size, so nothing is redrawn when the screen height changes.']}];
+const LOG_OLD=[{v:'1.9',d:'2026-10-26',n:['Swipe left or right on the plan to change weeks.','New layout: days run down the side with Lunch and Dinner as the columns. Use Split to give Tiffany and Eric different meals in the same box.','Copy and paste: copy a meal, then paste it into as many boxes as you like, one box at a time. Change weeks while pasting to copy from past weeks into this week or upcoming ones.','Meals that carry on from one box into the next now join into one connected shape, even across days.']}];
 const ver=$('#ver'),cur=LOG[0];$('#vt').textContent='v'+cur.v;$('#lv').textContent='Version '+cur.v+' · released '+pd(cur.d).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'});
 $('#ll').innerHTML=cur.n.map(t=>`<li>${esc(t)}</li>`).join('');
 const SUN=svg('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>'),MOON=svg('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>');
@@ -464,7 +466,7 @@ $('#invite').onclick=async()=>{const l=location.origin+location.pathname+'#sync=
 $('#disc').onclick=()=>{API='';localStorage.removeItem(SK);st('none');syncUI();msg.textContent='Sync turned off.'};
 
 function measure(){const g=grid.getBoundingClientRect(),f=$('#ver').getBoundingClientRect();CH=Math.round(g.top+scrollY+(f.bottom-g.bottom)+parseFloat(getComputedStyle(B).paddingBottom));grid.style.setProperty('--ch',CH+'px')}
-let lw=innerWidth;addEventListener('resize',()=>{if(innerWidth!==lw&&!bar.classList.contains('on')){lw=innerWidth;measure();render()}});
+let lw=innerWidth;addEventListener('resize',()=>{if(innerWidth!==lw&&!bar.classList.contains('on')){lw=innerWidth;VH=innerHeight;measure();render()}});
 if(wasLegacy)commit();syncArchive(true);render();measure();render();st('ok');setTimeout(()=>B.classList.remove('boot'),900);pull();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 

@@ -116,6 +116,7 @@ footer.hold{transform:scale(1.5);opacity:1;transition:transform .7s linear,opaci
 .hr{row-gap:0}.hr.tap{cursor:pointer}.hr .cv{width:14px;height:14px;flex:none;transition:transform .25s}.hc .cv{color:var(--mute)}.hr.open .cv{transform:rotate(180deg)}
 .hdet{grid-column:1/3;display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1)}.hr.open .hdet{grid-template-rows:1fr}.hdet>div{overflow:hidden;min-height:0}
 .hdet p{margin:6px 0 0;color:var(--mute);font-size:12px;white-space:pre-line}.hdet ul{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:var(--mute)}
+.bkr{margin-top:14px}.bkr b{font-weight:600}.bkr small{display:block;color:var(--mute);font-size:12px;margin-top:2px}.bkr .btns{margin-top:8px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}#splash .lg *{stroke-dashoffset:0!important}}
 </style></head><body class="boot">
 <div id="splash"><svg class="lg" viewBox="0 0 48 48"></svg><b>Zhou Menu</b></div>
@@ -135,6 +136,7 @@ footer.hold{transform:scale(1.5);opacity:1;transition:transform .7s linear,opaci
 <div id="scrim"></div>
 <div id="bin" aria-hidden="true"><svg viewBox="0 0 24 24"><g class="lid"><path d="M4 7h16M9 7V4.5h6V7"/></g><path d="M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/></svg></div>
 <div id="log"><div class="lh"><h2>What’s new</h2><button class="ib" id="thm"></button></div><p id="lv"></p><ul id="ll"></ul>
+<div class="bkr"><b>Backup</b><small id="bki"></small><div class="btns"><button class="btn" id="bkp">Back up</button><button class="btn" id="rst">Restore</button></div><input type="file" id="rsf" accept=".json,application/json" hidden></div>
 <div class="hw" id="syw" style="margin:14px 0 0"><button class="hb" id="syb"><span>Google Sheets sync<small id="ss"></small></span><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
 <div class="hx"><div class="hi" style="padding:0 14px 14px"><p>Paste your Apps Script web app URL. Share the invite link so both phones use the same sheet.</p>
 <input id="url" type="url" inputmode="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
@@ -174,7 +176,7 @@ function fromCells(c){const bl=[],k=x=>x.o?'out':x.w?'home':'';for(let i=0;i<14;
   if(A.t&&A.t===E.t&&k(A)===k(E))bl.push({id:uid(),l:'b',s,n:1,t:A.t,k:k(A)});else[A,E].forEach((x,j)=>{if(x.t||x.w||x.o)bl.push({id:uid(),l:j?'e':'t',s,n:1,t:x.t,k:k(x)})})}return bl}
 function mig(s){if(s.cells){s.blocks=fromCells(s.cells);s.post=s.weekend?2:0;s.ws=s.ws||targetMon();delete s.cells;delete s.weekend}
   if(s.ws){const base=dnOf(s.ws)*2-4;s.blocks=(s.blocks||[]).map(b=>({...b,s:b.s+base}));s.o=s.o||{};s.o[s.ws]={pre:s.pre||0,post:s.post||0};['ws','pre','post','nc'].forEach(k=>delete s[k]);s.legacy=true}
-  s.blocks=s.blocks||[];s.o=s.o||{};s.blocks.forEach(b=>{b.nt=b.nt||'';b.sl=b.sl||'';b.sd=b.sd||[];b.p=b.p||0});return s}
+  s.blocks=s.blocks||[];s.o=s.o||{};s.tk=s.tk||{};s.del=s.del||{};s.blocks.forEach(b=>{b.nt=b.nt||'';b.sl=b.sl||'';b.p=b.p||0;b.u=b.u||0;(b.sd||[]).forEach(k=>{const q=wkOf(b.s)+'|'+k;if(!s.tk[q])s.tk[q]=[1,0]});b.sd=[]});return s}
 function normHist(list){const m={};list.forEach(w=>(w.blocks||[]).forEach(x=>{const nb={d:x.d,m:x.m,n:x.n||1,l:x.l||'b',t:x.t||'',k:x.k||'',nt:x.nt||'',p:x.p||0,sl:x.sl||'',sd:x.sd||[]},k=wkOfDate(nb.d);(m[k]=m[k]||{ws:k,names:w.names||['Tiffany','Eric'],blocks:[]}).blocks.push(nb)}));
   return Object.values(m).map(w=>{const seen=new Set();w.blocks=w.blocks.filter(b=>{const q=b.d+b.m+b.l+b.t;if(seen.has(q))return false;seen.add(q);return true}).sort((a,b)=>toS(a)-toS(b)||(a.l<b.l?-1:1));return w}).sort((a,b)=>a.ws<b.ws?1:-1)}
 let S=mig(rd(K,null)||{updatedAt:0,names:['Tiffany','Eric'],blocks:[],o:{}}),API=localStorage[SK]||'',sel=null,rep=null,CWK=targetMon(),vw=CWK;
@@ -189,6 +191,18 @@ const free=(s,n,l,ex)=>{const[a,z]=vis();return s>=a&&s+n-1<=z&&!S.blocks.some(x
 const cutSlot=()=>dnOf(addD(CWK,-28))*2-4;
 function importHist(){hist.forEach(w=>w.blocks.forEach(x=>{const nb={id:uid(),l:x.l,s:toS(x),n:x.n,t:x.t,k:x.k,nt:x.nt||'',p:x.p||0,sl:x.sl||'',sd:x.sd||[]};if(nb.s+nb.n-1<cutSlot())return;if(!S.blocks.some(o=>ovl(nb,o)))S.blocks.push(nb)}));hist=hist.filter(w=>w.ws<CWK);localStorage[HK]=JSON.stringify(hist)}
 let wasLegacy=false;if(S.legacy){importHist();delete S.legacy;wasLegacy=true}
+let snapJ={};const snapAll=()=>{snapJ={};S.blocks.forEach(b=>snapJ[b.id]=JSON.stringify({...b,u:0}))};snapAll();
+/* stamp: meals changed since the last save get a new timestamp, removed meals are remembered as deletions */
+function stamp(){const now=Date.now(),cur={};S.blocks.forEach(b=>{const j=JSON.stringify({...b,u:0});cur[b.id]=j;if(snapJ[b.id]!==j){b.u=Math.max(now,(b.u||0)+1);if(S.del[b.id]&&S.del[b.id]<b.u)delete S.del[b.id]}});
+  Object.keys(snapJ).forEach(id=>{if(!(id in cur))S.del[id]=now});snapJ=cur;const old=now-120*864e5;Object.keys(S.del).forEach(k=>{if(S.del[k]<old)delete S.del[k]});Object.keys(S.tk).forEach(k=>{if(S.tk[k][1]&&S.tk[k][1]<old)delete S.tk[k]})}
+const maxMap=(x,y)=>{const o={...x};for(const k in y)o[k]=Math.max(o[k]||0,y[k]);return o};
+function mergeStates(L,R){if(!L)return R;if(!R)return L;const del=maxMap(L.del||{},R.del||{}),m=new Map();
+  [...L.blocks,...R.blocks].forEach(b=>{const o=m.get(b.id);if(!o||(b.u||0)>(o.u||0))m.set(b.id,b)});
+  const live=[...m.values()].filter(b=>!(del[b.id]&&del[b.id]>=(b.u||0))).sort((a,b)=>(b.u||0)-(a.u||0)||(a.id<b.id?-1:1)),keep=[];
+  live.forEach(b=>{if(keep.some(k=>ovl(k,b)))del[b.id]=Math.max(del[b.id]||0,Date.now());else keep.push(b)});
+  const o={...(L.o||{})};for(const k in R.o||{})if(!o[k]||(R.o[k].u||0)>(o[k].u||0))o[k]=R.o[k];
+  const tk={...(L.tk||{})};for(const k in R.tk||{})if(!tk[k]||R.tk[k][1]>tk[k][1])tk[k]=R.tk[k];
+  const base=(R.updatedAt||0)>(L.updatedAt||0)?R:L;return{...base,blocks:keep,o,tk,del,updatedAt:Math.max(L.updatedAt||0,R.updatedAt||0)}}
 function upsert(w){hist=hist.filter(x=>x.ws!==w.ws);hist.push(w);hist.sort((a,b)=>a.ws<b.ws?1:-1)}
 /* past weeks are archived automatically (and to the sheet); blocks older than 4 weeks leave the live plan */
 function syncArchive(prune){const by={};S.blocks.forEach(b=>{if(!meaningful(b))return;const w=wkOf(b.s);if(w<CWK)(by[w]=by[w]||[]).push(b)});
@@ -197,7 +211,7 @@ function syncArchive(prune){const by={};S.blocks.forEach(b=>{if(!meaningful(b))r
     if(snap.length)upsert({ws:w,names:S.names,blocks:snap});else hist=hist.filter(x=>x.ws!==w);pend=pend.filter(p=>p.ws!==w);pend.push({ws:w,names:S.names,blocks:snap})});
   localStorage[HK]=JSON.stringify(hist);localStorage[PK]=JSON.stringify(pend);
   if(prune){const n=S.blocks.length;S.blocks=S.blocks.filter(b=>b.s+b.n-1>=cutSlot());if(S.blocks.length!==n)commit()}flush()}
-function commit(){S.updatedAt=Math.max(Date.now(),S.updatedAt+1);S.cw=targetMon();const V=visFor(S.cw);S.pv=[V.a,V.z];localStorage[K]=JSON.stringify(S);syncArchive(false);push()}
+function commit(){stamp();S.updatedAt=Math.max(Date.now(),S.updatedAt+1);S.cw=targetMon();const V=visFor(S.cw);S.pv=[V.a,V.z];localStorage[K]=JSON.stringify(S);syncArchive(false);push()}
 
 /* ---- geometry: days are rows, Lunch/Dinner are columns; a meal is a run of slots drawn as one connected shape ---- */
 const items=b=>(b.sl||'').split('\n').map(x=>x.trim()).filter(Boolean),R2=n=>Math.round(n*100)/100;
@@ -214,9 +228,12 @@ function unionPath(rs,rad){
   while(E.size){const k0=E.keys().next().value;let[x,y]=k0.split(',').map(Number),pts=[],k=k0;
     for(let g=0;g<600&&E.has(k);g++){const L=E.get(k),n=L.shift();if(!L.length)E.delete(k);pts.push([x,y]);[x,y]=n;k=x+','+y;if(k===k0)break}
     const P=pts.filter((p,i)=>{const a=pts[(i+pts.length-1)%pts.length],b=pts[(i+1)%pts.length];return!((a[0]===p[0]&&p[0]===b[0])||(a[1]===p[1]&&p[1]===b[1]))});
-    out+=P.map((p,i)=>{const a=P[(i+P.length-1)%P.length],b=P[(i+1)%P.length],d1=Math.hypot(p[0]-a[0],p[1]-a[1]),d2=Math.hypot(b[0]-p[0],b[1]-p[1]),r=Math.min(rad,d1/2,d2/2),q=[p[0]+(a[0]-p[0])/d1*r,p[1]+(a[1]-p[1])/d1*r],w=[p[0]+(b[0]-p[0])/d2*r,p[1]+(b[1]-p[1])/d2*r];
-      return(i?'L':'M')+R2(q[0])+' '+R2(q[1])+'Q'+p[0]+' '+p[1]+' '+R2(w[0])+' '+R2(w[1])}).join('')+'Z'}
+    out+=roundPoly(P,rad)}
   return out}
+function roundPoly(P,rad){return P.map((p,i)=>{const a=P[(i+P.length-1)%P.length],b=P[(i+1)%P.length],d1=Math.hypot(p[0]-a[0],p[1]-a[1]),d2=Math.hypot(b[0]-p[0],b[1]-p[1]),r=Math.min(rad,d1/2,d2/2),q=[p[0]+(a[0]-p[0])/d1*r,p[1]+(a[1]-p[1])/d1*r],w=[p[0]+(b[0]-p[0])/d2*r,p[1]+(b[1]-p[1])/d2*r];
+  return(i?'L':'M')+R2(q[0])+' '+R2(q[1])+'Q'+R2(p[0])+' '+R2(p[1])+' '+R2(w[0])+' '+R2(w[1])}).join('')+'Z'}
+/* dinner box -> next day's lunch box: the two corners are joined by a diagonal strap with gentle (obtuse) rounded corners */
+function diagPath(D,L,a,rad){const[dx,dy,dw,dh]=D,[lx,ly,lw,lh]=L,by=dy+dh,rx=lx+lw;return roundPoly([[dx,dy],[dx+dw,dy],[dx+dw,by],[dx+a,by],[rx,ly+a],[rx,ly+lh],[lx,ly+lh],[lx,ly],[rx-a,ly],[dx,by-a]],rad)}
 /* a block's slots grouped by day, then joined into connected shapes (shared meals join across days; split halves stay per day) */
 function parts(b,a,z,G){const segs=[];
   for(let s=Math.max(b.s,a);s<=Math.min(b.s+b.n-1,z);s++){const r=(s>>1)-(a>>1),c=s&1,L=segs[segs.length-1];if(L&&L.r===r)L.cols.push(c);else segs.push({r,cols:[c]})}
@@ -226,8 +243,8 @@ function parts(b,a,z,G){const segs=[];
     const rs=sg.cols.map(c=>cellRect(G,sg.r,c,b.l));rs.forEach(q=>cur.rects.push(q));
     if(rs.length===2)cur.rects.push([rs[0][0]+rs[0][2],rs[0][1],R2(rs[1][0]-rs[0][0]-rs[0][2]),rs[0][3]].map(R2));
     if(link){if(shared.length)shared.forEach(c=>{const u=cellRect(G,pv.r,c,'b'),l=cellRect(G,sg.r,c,'b');cur.rects.push([u[0],R2(u[1]+u[3]),u[2],R2(l[1]-u[1]-u[3])])});
-      else{const xm=G.x0+G.cw,Y=sg.r*G.rh,k=G.m+9;cur.rects.push([xm-k,Y-k,2*k,2*k].map(R2))}}});
-  comps.forEach(cp=>{cp.d=unionPath(cp.rects,G.rad);const sg=cp.segs[0],rs=sg.cols.map(c=>cellRect(G,sg.r,c,b.l)),l=rs[rs.length-1];cp.box=[rs[0][0],rs[0][1],R2(l[0]+l[2]-rs[0][0]),rs[0][3]]});
+      else{cur.diag=[cellRect(G,pv.r,1,'b'),cellRect(G,sg.r,0,'b')]}}});
+  comps.forEach(cp=>{cp.d=cp.diag?diagPath(cp.diag[0],cp.diag[1],Math.round(G.rad*1.4),G.rad*1.2):unionPath(cp.rects,G.rad);const sg=cp.segs[0],rs=sg.cols.map(c=>cellRect(G,sg.r,c,b.l)),l=rs[rs.length-1];cp.box=[rs[0][0],rs[0][1],R2(l[0]+l[2]-rs[0][0]),rs[0][3]]});
   return comps}
 function slotAt(cx,cy){const g=grid.getBoundingClientRect(),[a,z]=vis(),days=(z-a+1)/2,d=Math.max(0,Math.min(days-1,Math.floor((cy-g.top)/RH))),c=cx-g.left-56<(g.width-56)/2?0:1;return{s:a+d*2+c,fy:Math.max(0,Math.min(1,((cy-g.top)-d*RH)/RH))}}
 function blkHTML(b,a,z,on){const G=geo(),cs=parts(b,a,z,G);if(!cs.length)return'';const nl=(b.nt||'').split('\n').find(x=>x.trim()),it=items(b),fl=nl||(it.length?'Shopping: '+it.join(', '):''),both=!!nl&&it.length>0,s0=Math.max(b.s,a),s1=Math.min(b.s+b.n-1,z);
@@ -255,7 +272,7 @@ function render(dir){
   set('#xb',(V.post>V.nq?`<button class="pill" data-x="post:-1">− ${fdd(M+4+V.post)}</button>`:'')+(V.post<2?`<button class="pill" data-x="post:1">+ ${fdd(M+5+V.post)}</button>`:''));
   if(dir&&!matchMedia('(prefers-reduced-motion:reduce)').matches)grid.animate([{opacity:0,transform:`translateX(${dir*22}px)`},{opacity:1,transform:'none'}],{duration:280,easing:'cubic-bezier(.2,.8,.2,1)'})
 }
-$('#xt').onclick=$('#xb').onclick=e=>{const x=e.target.closest('[data-x]')?.dataset.x;if(!x)return;const[k,d]=x.split(':'),V=visFor(vw),o={pre:V.pre,post:V.post};o[k]=Math.max(0,Math.min(2,o[k]+ +d));S.o[vw]=o;commit();render()};
+$('#xt').onclick=$('#xb').onclick=e=>{const x=e.target.closest('[data-x]')?.dataset.x;if(!x)return;const[k,d]=x.split(':'),V=visFor(vw),o={pre:V.pre,post:V.post};o[k]=Math.max(0,Math.min(2,o[k]+ +d));S.o[vw]={...o,u:Date.now()};commit();render()};
 /* week switcher (buttons, swipe, or the dates). Copy mode keeps the copied meal while you change weeks. */
 function go(d){if(sel)done();const n=addD(vw,7*d);if(n<minW()||n>maxW())return;vw=n;render(d)}
 $('#wp').onclick=()=>go(-1);$('#wn').onclick=()=>go(1);$('#wk').onclick=()=>{if(vw===CWK)return;if(sel)done();const d=vw<CWK?1:-1;vw=CWK;render(d)};
@@ -366,14 +383,14 @@ let tt=0;function toast(m,a,fn){$('#tmsg').textContent=m;const b=$('#tact');b.te
 /* ---- shopping view: every item from the week's meals in one tick-off list ---- */
 function shopItems(ws){const G=dnOf(ws)*2,L=new Map();
   S.blocks.filter(b=>b.s>=G-4&&b.s<=G+9&&items(b).length).sort((p,q)=>p.s-q.s).forEach(b=>items(b).forEach(t=>{const k=norm(t);let it=L.get(k);if(!it){it={t,k,bs:[]};L.set(k,it)}it.bs.push(b)}));
-  return[...L.values()].map(it=>({...it,done:it.bs.every(b=>(b.sd||[]).includes(it.k)),meals:[...new Set(it.bs.map(b=>b.t||'Untitled'))]})).sort((a,b)=>a.done-b.done)}
+  return[...L.values()].map(it=>({...it,done:!!(S.tk[ws+'|'+it.k]&&S.tk[ws+'|'+it.k][0]),meals:[...new Set(it.bs.map(b=>b.t||'Untitled'))]})).sort((a,b)=>a.done-b.done)}
 function renderShop(){const G=dnOf(vw)*2,L=shopItems(vw),left=L.filter(i=>!i.done).length;
   $('#shs').textContent=rngS(G-4,G+9);$('#shc').textContent=L.length?(left?`${left} to get`:'All done'):'';
   $('#shl').innerHTML=L.length?L.map(i=>`<button class="si${i.done?' on':''}" data-k="${esc(i.k)}"><i class="ck">${CHECK}</i><span><b>${esc(i.t)}</b><small>${esc(i.meals.join(', '))}</small></span></button>`).join(''):'<div class="empty">No shopping items yet. Open a meal and use the Shop tool to add some.</div>';
   $('#shb').style.display=L.length?'':'none';$('#shsh').style.display=navigator.share?'':'none'}
 $('#shl').addEventListener('click',e=>{const r=e.target.closest('.si');if(!r)return;const it=shopItems(vw).find(i=>i.k===r.dataset.k);if(!it)return;
-  it.bs.forEach(b=>{const d=new Set(b.sd||[]);it.done?d.delete(it.k):d.add(it.k);b.sd=[...d]});commit();renderShop()});
-$('#shu').onclick=()=>{shopItems(vw).forEach(i=>i.bs.forEach(b=>b.sd=[]));commit();renderShop()};
+  S.tk[vw+'|'+it.k]=[it.done?0:1,Date.now()];commit();renderShop()});
+$('#shu').onclick=()=>{shopItems(vw).forEach(i=>{S.tk[vw+'|'+i.k]=[0,Date.now()]});commit();renderShop()};
 function shopText(){const L=shopItems(vw),o=L.filter(i=>!i.done),G=dnOf(vw)*2;return`Shopping list, ${rngS(G-4,G+9)}\n`+(o.length?o:L).map(i=>'- '+i.t).join('\n')}
 $('#shcp').onclick=async()=>{try{await navigator.clipboard.writeText(shopText());toast('List copied')}catch{toast('Could not copy')}};
 $('#shsh').onclick=async()=>{try{await navigator.share({title:'Shopping list',text:shopText()})}catch(e){if(e.name!=='AbortError')toast('Could not share')}};
@@ -405,9 +422,10 @@ async function menuJPG(names,blocks,a,z){
   if(used.size||split){let lx=P,ly=top+days*RHc+46;x.font=`500 28px ${FF}`;x.textAlign='left';[['home','Home',HP],['out','Eating out',OP]].filter(e=>used.has(e[0])).forEach(([k,t,d])=>{const w=x.measureText(t).width+88;x.fillStyle=COL[k][0];rr(lx,ly,w,64,32);x.fill();icon(d,lx+18,ly+14,1.5,COL[k][1]);x.fillStyle=INK;x.fillText(t,lx+64,ly+42);lx+=w+16});
     if(split){x.fillStyle=MUTE;x.font=`500 26px ${FF}`;x.fillText(`${names[0][0]} = ${names[0]}    ${names[1][0]} = ${names[1]}`,lx,ly+42)}}
   return new Promise(r=>c.toBlob(r,'image/jpeg',.92))}
-async function saveJPG(blob,name){const f=new File([blob],name,{type:'image/jpeg'});
+async function saveFile(blob,name){const f=new File([blob],name,{type:blob.type});
   if(matchMedia('(pointer:coarse)').matches&&navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:'Zhou Menu'});return}catch(e){if(e.name==='AbortError')return}}
   const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+const saveJPG=saveFile;
 $('#dlBtn').onclick=async()=>{const[a,z]=vis();await saveJPG(await menuJPG(S.names,S.blocks,a,z),`Zhou-Menu-${vw}.jpg`)};
 async function dlWeek(ws){const w=hist.find(x=>x.ws===ws),bl=w.blocks.map(x=>({s:toS(x),n:x.n,l:x.l,t:x.t,k:x.k,p:x.p})),G=dnOf(ws)*2;
   await saveJPG(await menuJPG(w.names||S.names,bl,Math.min(G,...bl.map(b=>b.s))&-2,Math.max(G+9,...bl.map(b=>b.s+b.n-1))|1),`Zhou-Menu-${ws}.jpg`)}
@@ -433,17 +451,18 @@ $('#histBtn').onclick=openHist;
 
 /* ---- sync (Google Apps Script web app, last-write-wins on updatedAt) ---- */
 const dot=$('#dot'),SS={ok:'Connected',sync:'Syncing…',off:'Can’t reach the sheet',none:'Not connected'},st=s=>{const v=API?s:'none';dot.dataset.s=v;$('#ss').textContent=SS[v]};
-function adopt(r){S=mig(r);if(S.legacy){importHist();delete S.legacy;commit()}if(sel&&!get(sel))sel=null;localStorage[K]=JSON.stringify(S);render()}
-async function send(){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(S)});const w=await r.json();if(w&&w.updatedAt>S.updatedAt)adopt(w)}
+const canon=s=>JSON.stringify([[...s.blocks].sort((a,b)=>a.id<b.id?-1:1),s.o,s.tk,s.del]);
+function absorb(r){if(drag||rz||!r)return false;stamp();const m=mig(r);delete m.legacy;const before=canon(S),names=S.names&&S.names.length?S.names:m.names;S=mergeStates(S,m);S.names=names;snapAll();
+  if(canon(S)!==before){localStorage[K]=JSON.stringify(S);if(sel&&!get(sel))sel=null;render()}return canon(S)!==canon(m)}
+async function send(){stamp();const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(S)});absorb(await r.json())}
 let pt=0,busy=false;
 function push(){if(!API)return;st('sync');clearTimeout(pt);pt=setTimeout(async()=>{try{await send();st('ok')}catch{st('off')}},700)}
 async function pull(){tick();if(!API)return;if(busy||drag||rz||document.activeElement===mi||document.activeElement===mn||document.activeElement===ms)return;busy=true;st('sync');
-  try{const r=await(await fetch(API,{cache:'no-store'})).json();if(r&&r.updatedAt>S.updatedAt)adopt(r);else if(!r||S.updatedAt>r.updatedAt)await send();st('ok');flush()}catch{st('off')}busy=false}
+  try{const r=await(await fetch(API,{cache:'no-store'})).json();if(r){if(absorb(r))await send()}else await send();st('ok');flush()}catch{st('off')}busy=false}
 setInterval(()=>{tick();document.visibilityState==='visible'&&pull()},15000);document.addEventListener('visibilitychange',()=>document.visibilityState==='visible'&&pull());addEventListener('online',pull);
 
 /* ---- what's new + theme + hold-the-version ---- */
-const LOG=[{v:'1.9.1',d:'2026-10-29',n:['Smoother keyboard: closing it no longer squashes or shifts the plan, and the entry bar now drops away with the keyboard instead of lagging behind.','Rows keep a steady size, so nothing is redrawn when the screen height changes.']}];
-const LOG_OLD=[{v:'1.9',d:'2026-10-26',n:['Swipe left or right on the plan to change weeks.','New layout: days run down the side with Lunch and Dinner as the columns. Use Split to give Tiffany and Eric different meals in the same box.','Copy and paste: copy a meal, then paste it into as many boxes as you like, one box at a time. Change weeks while pasting to copy from past weeks into this week or upcoming ones.','Meals that carry on from one box into the next now join into one connected shape, even across days.']}];
+const LOG=[{v:'1.10',d:'2026-10-29',n:['Two phones can now edit at the same time. Changes are merged meal by meal (and tick by tick), so one person’s edit no longer replaces the other’s whole plan. Update both phones.','Smoother join between a dinner and the next day’s lunch.','Back up and Restore, in this panel: save everything to a file, or bring it back from one.']}];
 const ver=$('#ver'),cur=LOG[0];$('#vt').textContent='v'+cur.v;$('#lv').textContent='Version '+cur.v+' · released '+pd(cur.d).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'});
 $('#ll').innerHTML=cur.n.map(t=>`<li>${esc(t)}</li>`).join('');
 const SUN=svg('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>'),MOON=svg('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>');
@@ -453,6 +472,12 @@ let vt=0,vs=null;const vc=()=>{clearTimeout(vt);ver.classList.remove('hold')};
 ver.addEventListener('pointerdown',e=>{vs=[e.clientX,e.clientY];ver.classList.add('hold');vt=setTimeout(()=>{ver.classList.remove('hold');navigator.vibrate&&navigator.vibrate(15);themeBtn();show('log')},700)});
 ['pointerup','pointercancel','pointerleave'].forEach(t=>ver.addEventListener(t,vc));
 ver.addEventListener('pointermove',e=>{if(vs&&Math.hypot(e.clientX-vs[0],e.clientY-vs[1])>12)vc()});ver.addEventListener('contextmenu',e=>e.preventDefault());
+const bki=()=>{const t=+localStorage['meals.bk'];$('#bki').textContent=t?'Last backup: '+new Date(t).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):'No backup yet'};bki();
+$('#bkp').onclick=async()=>{await saveFile(new Blob([JSON.stringify({app:'ZhouMenu',version:cur.v,exported:new Date().toISOString(),state:S,history:hist},null,1)],{type:'application/json'}),`ZhouMenu_backup_${iso(new Date())}.json`);localStorage['meals.bk']=Date.now();bki();toast('Backup saved')};
+$('#rst').onclick=()=>$('#rsf').click();
+$('#rsf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;let d;try{d=JSON.parse(await f.text());if(d.app!=='ZhouMenu'||!d.state||!Array.isArray(d.state.blocks))throw 0}catch{return toast('That is not a Zhou Menu backup')}
+  const snap=JSON.stringify([S,hist]),now=Date.now();S=mig(d.state);S.blocks.forEach(b=>b.u=now);hist=normHist(d.history||[]);localStorage[HK]=JSON.stringify(hist);sel=null;rep=null;B.classList.remove('rep');bar.classList.remove('on');vw=CWK;commit();render();show(false);
+  toast('Backup restored','Undo',()=>{[S,hist]=JSON.parse(snap);const t=Date.now();S.blocks.forEach(b=>b.u=t);localStorage[HK]=JSON.stringify(hist);commit();render()})};
 /* sheets */
 const scrim=$('#scrim'),msg=$('#msg');
 let lt=0;

@@ -117,11 +117,13 @@ footer.hold{transform:scale(1.5);opacity:1;transition:transform .7s linear,opaci
 .hdet{grid-column:1/3;display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1)}.hr.open .hdet{grid-template-rows:1fr}.hdet>div{overflow:hidden;min-height:0}
 .hdet p{margin:6px 0 0;color:var(--mute);font-size:12px;white-space:pre-line}.hdet ul{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:var(--mute)}
 .bkr{margin-top:14px}.bkr b{font-weight:600}.bkr small{display:block;color:var(--mute);font-size:12px;margin-top:2px}.bkr .btns{margin-top:8px}
+.hd.v{width:22px;height:48px;margin:-24px 0 0 -11px}.hd.v::after{width:4px;height:26px}
+.brand .lg{cursor:pointer;transition:transform .15s}.brand .lg:active{transform:scale(.9)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}#splash .lg *{stroke-dashoffset:0!important}}
 </style></head><body class="boot">
 <div id="splash"><svg class="lg" viewBox="0 0 48 48"></svg><b>Zhou Menu</b></div>
 <header>
-  <div class="brand"><svg class="lg" viewBox="0 0 48 48"></svg><div><h1>Zhou Menu</h1><div class="wkr"><button class="wb" id="wp" aria-label="Previous week"><svg viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></svg></button><button id="wk"></button><button class="wb" id="wn" aria-label="Next week"><svg viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></svg></button></div></div></div>
+  <div class="brand"><svg class="lg" viewBox="0 0 48 48" role="button" aria-label="Go to this week"></svg><div><h1>Zhou Menu</h1><div class="wkr"><button class="wb" id="wp" aria-label="Previous week"><svg viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></svg></button><button id="wk"></button><button class="wb" id="wn" aria-label="Next week"><svg viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></svg></button></div></div></div>
   <div class="actions">
     <button class="ib" id="shBtn" aria-label="Shopping list"><svg viewBox="0 0 24 24"><path d="M3.5 4.5h2.3l2.1 10.2h9.4l1.8-7.4H6.6"/><circle cx="10" cy="19" r="1.1"/><circle cx="16.8" cy="19" r="1.1"/></svg></button>
     <button class="ib" id="dlBtn" aria-label="Download this week as a JPG"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11 12 15.5 16.5 11M5 19.5h14"/></svg></button>
@@ -251,7 +253,9 @@ function blkHTML(b,a,z,on){const G=geo(),cs=parts(b,a,z,G);if(!cs.length)return'
   let h=`<div class="blk ${b.k}${on?' sel':''}" data-id="${b.id}"><svg class="bs">${cs.map(c=>`<path class="sp" d="${c.d}"/>`).join('')}</svg>`;
   cs.forEach((c,i)=>{const[x,y,w,hh]=c.box,ln=Math.max(1,Math.floor((hh-14-(fl?14:0))/17.5));
     h+=`<div class="bx${both?' ic2':''}" style="left:${x}px;top:${y}px;width:${w}px;height:${hh}px;--ln:${ln}">${b.l!=='b'?`<i class="who">${esc((S.names[b.l==='t'?0:1]||'?')[0])}</i>`:''}<div class="bw"><div class="bt">${esc(b.t)}${b.p?`<span class="pt">×${b.p}</span>`:''}</div>${fl?`<div class="bn">${esc(fl)}</div>`:''}</div>${i===0&&b.k?`<i class="bk">${b.k==='home'?HOME:OUT}</i>`:''}${i===0&&nl?`<i class="bk nt">${NOTE}</i>`:''}${i===0&&it.length?`<i class="bk shp${both?' b2':''}">${SHOP}</i>`:''}</div>`});
-  if(on){const f=cellRect(G,(s0>>1)-(a>>1),s0&1,b.l),l=cellRect(G,(s1>>1)-(a>>1),s1&1,b.l);h+=`<i class="hd top" style="left:${f[0]+f[2]/2}px;top:${f[1]}px"></i><i class="hd bot" style="left:${l[0]+l[2]/2}px;top:${l[1]+l[3]}px"></i>`}
+  if(on){const f=cellRect(G,(s0>>1)-(a>>1),s0&1,b.l),l=cellRect(G,(s1>>1)-(a>>1),s1&1,b.l);
+    h+=(s0&1)?`<i class="hd top v" style="left:${f[0]}px;top:${f[1]+f[3]/2}px"></i>`:`<i class="hd top" style="left:${f[0]+f[2]/2}px;top:${f[1]}px"></i>`;
+    h+=(s1&1)?`<i class="hd bot" style="left:${l[0]+l[2]/2}px;top:${l[1]+l[3]}px"></i>`:`<i class="hd bot v" style="left:${l[0]+l[2]}px;top:${l[1]+l[3]/2}px"></i>`}
   return h+'</div>'}
 function repaint(b){const el=grid.querySelector(`.blk[data-id="${b.id}"]`),[a,z]=vis(),t=document.createElement('div');t.innerHTML=blkHTML(b,a,z,b.id===sel);const n=t.firstElementChild;if(el&&n)el.replaceWith(n);else if(n)grid.appendChild(n);else if(el)el.remove()}
 const weekTag=()=>{const d=Math.round((dnOf(vw)-dnOf(CWK))/7);return d===0?'':d===1?'Next week':d===-1?'Last week':d>1?`In ${d} weeks`:`${-d} weeks ago`};
@@ -275,6 +279,7 @@ function render(dir){
 $('#xt').onclick=$('#xb').onclick=e=>{const x=e.target.closest('[data-x]')?.dataset.x;if(!x)return;const[k,d]=x.split(':'),V=visFor(vw),o={pre:V.pre,post:V.post};o[k]=Math.max(0,Math.min(2,o[k]+ +d));S.o[vw]={...o,u:Date.now()};commit();render()};
 /* week switcher (buttons, swipe, or the dates). Copy mode keeps the copied meal while you change weeks. */
 function go(d){if(sel)done();const n=addD(vw,7*d);if(n<minW()||n>maxW())return;vw=n;render(d)}
+document.querySelector('.brand .lg').addEventListener('click',()=>{if(sel)done();if(vw!==CWK){const d=vw<CWK?1:-1;vw=CWK;render(d)}scrollTo({top:0,behavior:'smooth'})});
 $('#wp').onclick=()=>go(-1);$('#wn').onclick=()=>go(1);$('#wk').onclick=()=>{if(vw===CWK)return;if(sel)done();const d=vw<CWK?1:-1;vw=CWK;render(d)};
 function tick(){const c=targetMon();if(c===CWK)return;const follow=vw===CWK;CWK=c;if(follow&&!sel&&!rep&&!drag&&!rz){vw=c;render(1);toast('New week started')}syncArchive(true)}
 const rects=()=>{const m={};grid.querySelectorAll('.blk').forEach(c=>m[c.dataset.id]=(c.querySelector('.bx')||c).getBoundingClientRect());return m};
@@ -357,18 +362,23 @@ addEventListener('pointermove',e=>{
 addEventListener('touchmove',e=>{if(drag)e.preventDefault()},{passive:false});
 function startDrag(){if(!press||drag)return;const b=press.b,c=press.c,G=geo(),w=G.cw-2*G.m,h=b.l==='b'?G.rh-2*G.m:(G.rh-2*G.m-3)/2,g=document.createElement('div'),dp=document.createElementNS('http://www.w3.org/2000/svg','svg');
   g.className='ghost '+b.k;g.style.width=w+'px';g.style.height=h+'px';g.innerHTML=`<div class="bw"><div class="bt">${esc(b.t)}</div></div>`;B.appendChild(g);dp.setAttribute('class','bs drp');grid.appendChild(dp);
-  drag={c,b,g,dp,w,h,pl:null};c.classList.add('lifted');B.classList.add('dragging');navigator.vibrate&&navigator.vibrate(10);loop()}
+  drag={c,b,g,dp,w,h,pl:null,gi:press.grab};c.classList.add('lifted');B.classList.add('dragging');navigator.vibrate&&navigator.vibrate(10);loop()}
 function loop(){if(!drag)return;const y=press.ly;if(!drag.del){if(y<90)scrollBy(0,-9);else if(y>innerHeight-110)scrollBy(0,9)}place();requestAnimationFrame(loop)}
 function place(){const{g,b,dp,w,h}=drag,x=press.lx,y=press.ly,br=$('#bin').getBoundingClientRect(),over=x>br.left-16&&x<br.right+16&&y>br.top-16&&y<br.bottom+16;
   $('#bin').classList.toggle('hot',over);g.style.transform=`translate(${x-w/2}px,${y-h/2}px) scale(${over?.8:1.03})`;g.style.opacity=over?.7:1;drag.del=over;if(over){drag.pl=null;dp.innerHTML='';return}
-  const q=slotAt(x,y),[a,z]=vis(),s=Math.max(a,Math.min(z-b.n+1,q.s-press.grab)),l=b.l==='b'?'b':q.fy<.5?'t':'e',p=s!==b.s||l!==b.l?plan(b,s,l):null;drag.pl=p;
-  dp.innerHTML=p?parts({...b,s,l},a,z,geo()).map(c=>`<path d="${c.d}"/>`).join(''):''}
+  const q=slotAt(x,y),[a,z]=vis(),s=Math.max(a,Math.min(z-b.n+1,q.s-press.grab)),l=b.l==='b'?'b':q.fy<.5?'t':'e';let p=s!==b.s||l!==b.l?plan(b,s,l):null,pv={...b,s,l};
+  if(!p&&b.n>1&&(q.s<b.s||q.s>b.s+b.n-1)&&free(q.s,1,l,b)){p={one:true,s:q.s,l};pv={...b,s:q.s,n:1,l}}
+  drag.pl=p;dp.innerHTML=p?parts(pv,a,z,geo()).map(c=>`<path d="${c.d}"/>`).join(''):''}
 function end(cancel){clearTimeout(timer);if(rz){rz=null;commit();render();return}if(!press)return;
   if(!drag){const id=press.c.dataset.id;press=null;if(!cancel)select(id,id===sel);return}
-  const{c,g,pl,dp,del}=drag,gr=g.getBoundingClientRect(),id=c.dataset.id;dp.remove();c.classList.remove('lifted');B.classList.remove('dragging');$('#bin').classList.remove('hot');drag=null;press=null;
+  const{c,g,pl,dp,del,b,gi}=drag,gr=g.getBoundingClientRect(),id=c.dataset.id;dp.remove();c.classList.remove('lifted');B.classList.remove('dragging');$('#bin').classList.remove('hot');drag=null;press=null;
   if(del&&!cancel){const br=$('#bin').getBoundingClientRect(),snap=JSON.stringify(S.blocks);g.style.transition='transform .22s ease-in,opacity .22s';g.style.transform=`translate(${br.left+br.width/2-gr.width/2}px,${br.top+br.height/2-gr.height/2}px) scale(.1)`;g.style.opacity=0;setTimeout(()=>g.remove(),240);
     S.blocks=S.blocks.filter(x=>x.id!==id);if(sel===id){sel=null;bar.classList.remove('on');bar.dataset.tab='';B.style.paddingBottom=''}commit();render();toast('Meal deleted','Undo',()=>{S.blocks=JSON.parse(snap);commit();render()});return}
-  g.remove();if(cancel||!pl)return;const bf=rects();bf[id]=gr;pl.m.forEach(([p,s,l])=>{p.s=s;p.l=l});commit();render();flip(bf)}
+  g.remove();if(cancel||!pl)return;const bf=rects();bf[id]=gr;
+  if(pl.one){const nb={...b,id:uid(),s:pl.s,n:1,l:pl.l,nt:'',sl:'',sd:[]};
+    if(gi===0){b.s+=1;b.n-=1}else if(gi===b.n-1){b.n-=1}else{S.blocks.push({...b,id:uid(),s:b.s+gi+1,n:b.n-gi-1,nt:'',sl:'',sd:[]});b.n=gi}
+    S.blocks.push(nb);mergeAround(nb)}else pl.m.forEach(([p,s,l])=>{p.s=s;p.l=l});
+  commit();render();flip(bf)}
 addEventListener('pointerup',()=>end(false));addEventListener('pointercancel',()=>end(true));
 /* swipe left/right to change weeks */
 let sw=null;
@@ -462,7 +472,7 @@ async function pull(){tick();if(!API)return;if(busy||drag||rz||document.activeEl
 setInterval(()=>{tick();document.visibilityState==='visible'&&pull()},15000);document.addEventListener('visibilitychange',()=>document.visibilityState==='visible'&&pull());addEventListener('online',pull);
 
 /* ---- what's new + theme + hold-the-version ---- */
-const LOG=[{v:'1.10',d:'2026-10-29',n:['Two phones can now edit at the same time. Changes are merged meal by meal (and tick by tick), so one person’s edit no longer replaces the other’s whole plan. Update both phones.','Smoother join between a dinner and the next day’s lunch.','Back up and Restore, in this panel: save everything to a file, or bring it back from one.']}];
+const LOG=[{v:'1.10.1',d:'2026-11-09',n:['Tap the logo to jump back to this week.','Dragging a meal down to the next day now always moves it. The stretch handles sit on the side next to the following meal, so they no longer catch your drag.','If a connected run of the same meal can’t fit where you drop it, only the box you dragged moves.']}];
 const ver=$('#ver'),cur=LOG[0];$('#vt').textContent='v'+cur.v;$('#lv').textContent='Version '+cur.v+' · released '+pd(cur.d).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'});
 $('#ll').innerHTML=cur.n.map(t=>`<li>${esc(t)}</li>`).join('');
 const SUN=svg('<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>'),MOON=svg('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>');
